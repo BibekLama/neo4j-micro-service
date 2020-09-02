@@ -90,21 +90,25 @@ public class MovieController {
 		return dao.updateMovie(id, movie);
 	}
 	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value="/movies/{movieId}/actors/{personId}")
 	public List<Person> assignActorToMovie(@PathVariable long personId, @PathVariable long movieId) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
 		return dao.assignActorToMovie(movieId, personId);
 	}
 	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value="/movies/{movieId}/directors/{personId}")
 	public List<Person> assignDirectorToMovie(@PathVariable long personId, @PathVariable long movieId) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
 		return dao.assignDirectorToMovie(movieId, personId);
 	}
 	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value="/movies/{movieId}/producers/{personId}")
 	public List<Person> assignProducerToMovie(@PathVariable long personId, @PathVariable long movieId) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
 		return dao.assignProducerToMovie(movieId, personId);
 	}
 	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value="/movies/{movieId}/writers/{personId}")
 	public List<Person> assignWriterToMovie(@PathVariable long personId, @PathVariable long movieId) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
 		return dao.assignWriterToMovie(movieId, personId);

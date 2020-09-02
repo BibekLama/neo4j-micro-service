@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +24,7 @@ public class PersonController {
 	@Inject
 	Neo4jPersonDAO dao;
 	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value="/actors")
 	public List<Person> actorList(
 			@RequestParam(value = "page",required = false, defaultValue="0") int page, 
@@ -32,6 +34,7 @@ public class PersonController {
 		return dao.actorList(page, limit, orderby, order);
 	}
 	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value="/directors")
 	public List<Person> directorList(
 			@RequestParam(value = "page",required = false, defaultValue="0") int page, 
@@ -41,6 +44,7 @@ public class PersonController {
 		return dao.directorList(page, limit, orderby, order);
 	}
 	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value="/producers")
 	public List<Person> producerList(
 			@RequestParam(value = "page",required = false, defaultValue="0") int page, 
@@ -50,6 +54,7 @@ public class PersonController {
 		return dao.producerList(page, limit, orderby, order);
 	}
 	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value="/writers")
 	public List<Person> writerList(
 			@RequestParam(value = "page",required = false, defaultValue="0") int page, 
@@ -64,26 +69,31 @@ public class PersonController {
 		return dao.addPerson(person);
 	}
 	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value="/persons/{id}")
 	public Person getPerson(@PathVariable long id) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
 		return dao.getPersonById(id);
 	}
 	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value="/actors/{personId}/movies/{movieId}")
 	public List<Movie> assignMovieToActor(@PathVariable long personId, @PathVariable long movieId) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
 		return dao.assignMovieToActor(movieId, personId);
 	}
 	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value="/directors/{personId}/movies/{movieId}")
 	public List<Movie> assignMovieToDirector(@PathVariable long personId, @PathVariable long movieId) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
 		return dao.assignMovieToDirector(movieId, personId);
 	}
 	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value="/producers/{personId}/movies/{movieId}")
 	public List<Movie> assignMovieToProducer(@PathVariable long personId, @PathVariable long movieId) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
 		return dao.assignMovieToProducer(movieId, personId);
 	}
 	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value="/writers/{personId}/movies/{movieId}")
 	public List<Movie> assignMovieToWriter(@PathVariable long personId, @PathVariable long movieId) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
 		return dao.assignMovieToWriter(movieId, personId);
