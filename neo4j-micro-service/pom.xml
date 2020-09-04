@@ -25,6 +25,12 @@
 		</dependency>
 		
 		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-tomcat</artifactId>
+		    <scope>provided</scope>
+		</dependency>
+		
+		<dependency>
 		    <groupId>org.neo4j.driver</groupId>
 		    <artifactId>neo4j-java-driver</artifactId>
 		    <version>4.1.1</version>
