@@ -43,8 +43,13 @@ public class Neo4jPersonDAO {
 			if(limit > 0) {
 				rs = tx.run(("MATCH (p:Person)-[r:"+relation+"]->(m:Movie) RETURN DISTINCT ID(p) as ID, p ORDER BY p."+orderby+" "+order+" SKIP "+((page-1)*limit)+" LIMIT "+limit+""));	
 			}
+			
 			if(orderby.equals("id")) {
-				rs = tx.run(("MATCH (p:Person)-[r:"+relation+"]->(m:Movie) RETURN DISTINCT ID(p) as ID, p ORDER BY ID "+order+" SKIP "+((page-1)*limit)+" LIMIT "+limit+""));
+				rs = tx.run(("MATCH (p:Person)-[r:"+relation+"]->(m:Movie) RETURN DISTINCT ID(p) as ID, p ORDER BY ID(p) "+order+" "));
+			}
+			
+			if(limit > 0 && orderby.equals("id")) {
+				rs = tx.run(("MATCH (p:Person)-[r:"+relation+"]->(m:Movie) RETURN DISTINCT ID(p) as ID, p ORDER BY ID(p) "+order+" SKIP "+((page-1)*limit)+" LIMIT "+limit+""));
 			}
 			while (rs.hasNext()) {
 	            Record row = rs.next();
