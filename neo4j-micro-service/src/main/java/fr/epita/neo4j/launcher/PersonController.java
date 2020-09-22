@@ -25,6 +25,16 @@ public class PersonController {
 	Neo4jPersonDAO dao;
 	
 	@CrossOrigin(origins = "*")
+	@GetMapping(value="/persons")
+	public List<Person> personList(
+			@RequestParam(value = "page",required = false, defaultValue="0") int page, 
+			@RequestParam(value = "limit",required = false, defaultValue="0") int limit,
+			@RequestParam(value = "orderBy",required = false, defaultValue="id") String orderby, 
+			@RequestParam(value = "order",required = false, defaultValue="DESC") String order) throws Neo4jPersonBusinessException{
+		return dao.personList(page, limit, orderby, order, "");
+	}
+	
+	@CrossOrigin(origins = "*")
 	@GetMapping(value="/actors")
 	public List<Person> actorList(
 			@RequestParam(value = "page",required = false, defaultValue="0") int page, 

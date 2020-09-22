@@ -34,23 +34,31 @@ public class Neo4jPersonDAO {
 	 * params: page:int, limit:int, orderby:String, order:String, relation:String
 	 * return: List<Person>
 	 */
-	private List<Person> personList(int page, int limit, String orderby, String order, String relation) throws Neo4jPersonBusinessException{
+	public List<Person> personList(int page, int limit, String orderby, String order, String relation) throws Neo4jPersonBusinessException{
 		DBConnection db = new DBConnection();
 		List<Person> persons = new ArrayList<>();
 		try(Session session = db.getDriver().session()){
+			
 			Transaction tx = session.beginTransaction();
-			Result rs = tx.run(("MATCH (p:Person)-[r:"+relation+"]->(m:Movie) RETURN DISTINCT ID(p) as ID, p ORDER BY p."+orderby+" "+order+""));
-			if(limit > 0) {
-				rs = tx.run(("MATCH (p:Person)-[r:"+relation+"]->(m:Movie) RETURN DISTINCT ID(p) as ID, p ORDER BY p."+orderby+" "+order+" SKIP "+((page-1)*limit)+" LIMIT "+limit+""));	
-			}
+			
+			String query = "MATCH (p:Person) RETURN DISTINCT ID(p) as ID, p ORDER BY p."+orderby+" "+order+"";
 			
 			if(orderby.equals("id")) {
-				rs = tx.run(("MATCH (p:Person)-[r:"+relation+"]->(m:Movie) RETURN DISTINCT ID(p) as ID, p ORDER BY ID(p) "+order+" "));
+				query = "MATCH (p:Person) RETURN DISTINCT ID(p) as ID, p ORDER BY ID(p) "+order+" ";
 			}
 			
-			if(limit > 0 && orderby.equals("id")) {
-				rs = tx.run(("MATCH (p:Person)-[r:"+relation+"]->(m:Movie) RETURN DISTINCT ID(p) as ID, p ORDER BY ID(p) "+order+" SKIP "+((page-1)*limit)+" LIMIT "+limit+""));
+			if(!relation.trim().equals("")) {
+				query = "MATCH (p:Person)-[r:"+relation+"]->(m:Movie) RETURN DISTINCT ID(p) as ID, p ORDER BY p."+orderby+" "+order+"";
+				if(limit > 0) {
+					query = "MATCH (p:Person)-[r:"+relation+"]->(m:Movie) RETURN DISTINCT ID(p) as ID, p ORDER BY p."+orderby+" "+order+" SKIP "+((page-1)*limit)+" LIMIT "+limit+"";	
+					if(orderby.equals("id")) {
+						query = "MATCH (p:Person)-[r:"+relation+"]->(m:Movie) RETURN DISTINCT ID(p) as ID, p ORDER BY ID(p) "+order+" SKIP "+((page-1)*limit)+" LIMIT "+limit+"";
+					}
+				}
 			}
+			
+			Result rs = tx.run(query);
+			
 			while (rs.hasNext()) {
 	            Record row = rs.next();
 	            Value value = row.get("p");
