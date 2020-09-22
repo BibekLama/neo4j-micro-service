@@ -182,7 +182,7 @@ public class Neo4jPersonDAO {
 		Person newPerson = new Person();
 		// Check if person with same name is exists
 		Transaction tx1 = db.getDriver().session().beginTransaction();
-		Result result = tx1.run(("MATCH (n:Person {name: $title, born: $born}) RETURN n"), parameters("name", person.getName(), "born", person.getBorn()));
+		Result result = tx1.run(("MATCH (n:Person {name: $name, born: $born}) RETURN n"), parameters("name", person.getName(), "born", person.getBorn()));
 		if(result.hasNext() && result.next() != null) {
 			throw new Neo4jPersonBusinessException("Person is already exists");
 		}
