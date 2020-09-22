@@ -222,7 +222,9 @@ public class Neo4jPersonDAO {
 				Map<String, Object> properties = value.asEntity().asMap();
 				person.setId(record.get("ID").asLong());
 				person.setName(String.valueOf(properties.get("name")));
-				person.setBorn(Long.valueOf(String.valueOf(properties.get("born"))));
+				if(properties.get("born") != null) {
+	            	person.setBorn(Long.valueOf(String.valueOf(properties.get("born"))));
+	            }
 				person.setActedIn(movieDAO.getActorMovies(record.get("ID").asLong()));
 				person.setDirected(movieDAO.getDirectorMovies(record.get("ID").asLong()));
 				person.setProduced(movieDAO.getProducerMovies(record.get("ID").asLong()));
