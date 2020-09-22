@@ -74,6 +74,7 @@ public class PersonController {
 		return dao.writerList(page, limit, orderby, order);
 	}
 	
+	@CrossOrigin(origins = "*")
 	@PostMapping(value="/persons")
 	public Person addPerson(@RequestBody Person person) throws Neo4jPersonBusinessException {
 		return dao.addPerson(person);
