@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -85,6 +86,12 @@ public class PersonController {
 	@PatchMapping(value="/persons/{id}")
 	public Person updatePerson(@PathVariable long id, @RequestBody Person person) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
 		return dao.updatePerson(id, person);
+	}
+	
+	@CrossOrigin(origins = "*")
+	@DeleteMapping(value="/persons/{id}")
+	public Person deletePerson(@PathVariable long id) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
+		return dao.deletePerson(id);
 	}
 	
 	@CrossOrigin(origins = "*")

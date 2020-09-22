@@ -227,9 +227,10 @@ public class Neo4jPersonDAO {
 				Map<String, Object> params = new HashMap<String, Object>();
 				params.put( "name", person.getName() );
 				params.put( "born", person.getBorn() );
-				String query = "MATCH (p:Person) WHERE id(n)="+id+" SET p.name='"+person.getName()+"', p.born='"+person.getBorn()+" RETURN p, ID(p) as ID";
+				String query = "MATCH (p:Person) WHERE id(p)="+id+" SET p.name='"+person.getName()+"', p.born="+person.getBorn()+" RETURN p, ID(p) as ID"+"";
 				Result rs = tx.run(query, params);
 				Record record = rs.single();
+				tx.commit();
 				try {
 					return getPersonById(record.get("ID").asLong());
 				} catch (Neo4jPersonBusinessException | Neo4jMovieBusinessException e) {
@@ -243,6 +244,57 @@ public class Neo4jPersonDAO {
 			throw new Neo4jPersonBusinessException("Unable to update person", e);
 		}
 		return newPerson;
+	}
+	
+	/* Method to delete person
+	 * Parameters: id:Long
+	 * Returns: Person */
+	public Person deletePerson(long id) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
+		DBConnection db = new DBConnection();
+		Person person = new Person();
+		try( Session session = db.getDriver().session()){
+			Person deletedPerson = new Person();
+			
+			// Check if movie with same title name is exists
+			Transaction tx1 = db.getDriver().session().beginTransaction();
+			Result result = tx1.run(("MATCH (p:Person) WHERE id(p)="+id+" RETURN p, id(p) as ID"));
+			if(!result.hasNext()) {
+				throw new Neo4jPersonBusinessException("Person does not exists");
+			}else {
+				Record rec = result.next();
+				Value value = rec.get("p");
+				Map<String, Object> properties = value.asEntity().asMap();
+				deletedPerson.setId(rec.get("ID").asLong());
+				deletedPerson.setName(String.valueOf(properties.get("name")));
+				if(properties.get("born") != null) {
+					deletedPerson.setBorn(Long.valueOf(String.valueOf(properties.get("born"))));
+	            }
+				deletedPerson.setActedIn(movieDAO.getActorMovies(rec.get("ID").asLong()));
+				deletedPerson.setDirected(movieDAO.getDirectorMovies(rec.get("ID").asLong()));
+				deletedPerson.setProduced(movieDAO.getProducerMovies(rec.get("ID").asLong()));
+				deletedPerson.setWrote(movieDAO.getWriterMovies(rec.get("ID").asLong()));
+			}
+						
+			int res = session.writeTransaction(tx -> {
+				
+				// Delete movie by movie node id
+				String deletePersonQuery = "MATCH (p:Person) WHERE id(p)="+id+" DETACH DELETE p RETURN COUNT(p) as deletedNodes";
+				Result deletePersonResult = tx.run(deletePersonQuery);
+				Record record = deletePersonResult.single();
+				tx.commit();
+				tx.close();
+				return record.get("deletedNodes").asInt();
+			});
+			session.close();
+			db.close();
+			if(res > 0) {
+				person = deletedPerson;
+			}
+		}catch(ClientException e) {
+			e.printStackTrace();
+			throw new Neo4jPersonBusinessException("Unable to delete person.", e);
+		}
+		return person;
 	}
 	
 	public Person getPersonById(long id) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException {
@@ -357,5 +409,48 @@ public class Neo4jPersonDAO {
 			movies = movieDAO.getWriterMovies(personId);
 		}
 		return movies;
+	}
+	
+	/* Method to get persons list that matched with name
+	 * Parameters: str:String
+	 * Returns: List<Person> */
+	public List<Person> getPersonByName(String str) throws Neo4jMovieBusinessException {
+		DBConnection db = new DBConnection();
+		List<Person> res = new ArrayList<>();
+		if(str.trim().length() > 0) {
+			try( Session session = db.getDriver().session() ){
+				res = session.readTransaction(tx -> {
+					
+					// Find person that contains given string in name
+					Result result = tx.run(("MATCH (p:Person) WHERE p.name CONTAINS $search RETURN p, ID(p) as ID"), parameters("search", str));
+					List<Person> persons = new ArrayList<>();
+					while (result.hasNext()) {
+			            Record row = result.next();
+			            Value value = row.get("p");
+			            Map<String, Object> properties = value.asEntity().asMap();
+			            Person person = new Person();
+			            person.setId(row.get("ID").asLong());
+			            person.setName(String.valueOf(properties.get("name")));
+			            if(properties.get("born") != null) {
+			            	person.setBorn(Long.valueOf(String.valueOf(properties.get("born"))));
+			            }
+			            persons.add(person);
+			        }	
+					tx.close();
+					return persons;
+				});
+				session.close();
+				if(res.size() == 0) {
+					throw new Neo4jMovieBusinessException("Persons list is empty.");
+				}
+				db.close();	
+			}catch(ClientException e) {
+				e.printStackTrace();
+				throw new Neo4jMovieBusinessException("Unable to search persons.", e);
+			}
+		}else{
+			throw new Neo4jMovieBusinessException("Search text is empty.");
+		}
+		return res;
 	}
 }
