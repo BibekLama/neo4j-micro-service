@@ -81,7 +81,7 @@ public class MovieController {
 		return dao.deleteMovie(id);
 	}
 	
-	/* Method: PUT
+	/* Method: PATCH
 	 * URL: http://localhost:19080/movies/{id}
 	 * return: Movie */
 	@CrossOrigin(origins = "*")

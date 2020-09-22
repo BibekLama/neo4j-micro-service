@@ -209,6 +209,42 @@ public class Neo4jPersonDAO {
 		return newPerson;
 	}
 	
+	/* Update person
+	 * params: Person person
+	 * return: Person
+	 */
+	public Person updatePerson(long id, Person person) throws Neo4jPersonBusinessException{
+		DBConnection db = new DBConnection();
+		Person newPerson = new Person();
+		// Check if person with same name is exists
+		Transaction tx1 = db.getDriver().session().beginTransaction();
+		Result result = tx1.run(("MATCH (p:Person) WHERE id(p)="+id+" RETURN p"));
+		if(result.hasNext() && result.next() == null) {
+			throw new Neo4jPersonBusinessException("Person does not exists");
+		}
+		try(Session session = db.getDriver().session()){
+			newPerson = session.writeTransaction(tx -> {
+				Map<String, Object> params = new HashMap<String, Object>();
+				params.put( "name", person.getName() );
+				params.put( "born", person.getBorn() );
+				String query = "MATCH (p:Person) WHERE id(n)="+id+" SET p.name='"+person.getName()+"', p.born='"+person.getBorn()+" RETURN p, ID(p) as ID";
+				Result rs = tx.run(query, params);
+				Record record = rs.single();
+				try {
+					return getPersonById(record.get("ID").asLong());
+				} catch (Neo4jPersonBusinessException | Neo4jMovieBusinessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					return null;
+				}
+			});
+		}catch(ClientException e) {
+			e.printStackTrace();
+			throw new Neo4jPersonBusinessException("Unable to update person", e);
+		}
+		return newPerson;
+	}
+	
 	public Person getPersonById(long id) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException {
 		Person person = new Person();
 		DBConnection db = new DBConnection();
