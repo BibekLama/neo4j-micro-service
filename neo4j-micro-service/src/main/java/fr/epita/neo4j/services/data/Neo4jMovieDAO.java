@@ -335,83 +335,68 @@ public class Neo4jMovieDAO {
 	 * params: long mId, long pId, String relation
 	 * return: int
 	 */
-	public int assignPersonToMovie(long mId, long pId, String relation) throws Neo4jMovieBusinessException{
+	public List<Person> assignPersonToMovie(long mId, List<Person> persons, String relation) throws Neo4jMovieBusinessException{
 		DBConnection db = new DBConnection();
-		int res = 0;
+		List<Person> result = new ArrayList<>();
 		try(Session session = db.getDriver().session()) {
-			Transaction tx1 = db.getDriver().session().beginTransaction();
-			String query1 = "MATCH (m:Movie)<-[r:"+relation+"]->(p:Person) WHERE ID(m)="+mId+" AND ID(p)="+pId+" RETURN COUNT(r) AS count";
-			Result result = tx1.run(query1);
-			if(result.hasNext()) {
-				Record rec = result.next();
-				if(rec.get("count").asInt() > 0) {
-					throw new Neo4jMovieBusinessException("Person is already assigned.");
-				}
+			for(Person person : persons) {
+				Person res = session.writeTransaction(tx -> {
+					String query = "MATCH (m:Movie), (p:Person) WHERE ID(m)="+mId+" AND ID(p)="+person.getId()+" MERGE (m)<-[r:"+relation+"]-(p) RETURN p";
+					Result rs = tx.run(query);
+					Person p = new Person();
+					if(rs.hasNext()) {
+						Record record = rs.next();
+						Value value = record.get("p");
+						Map<String, Object> properties = value.asEntity().asMap();
+						person.setId(record.get("ID").asLong());
+						person.setName(String.valueOf(properties.get("name")));
+						if(properties.get("born") != null) {
+			            	person.setBorn(Long.valueOf(String.valueOf(properties.get("born"))));
+			            }
+					}
+					tx.commit();
+					tx.close();
+					return p;
+				});
+			    result.add(res);
 			}
-			res = session.writeTransaction(tx -> {
-				String query = "MATCH (m:Movie),(p:Person) WHERE ID(m)="+mId+" AND ID(p)="+pId+" MERGE (m)<-[r:"+relation+"]-(p) RETURN COUNT(r) AS count";
-				Result rs = tx.run(query);
-				int count = 0;
-				if(rs.hasNext()) {
-					Record record = rs.next();
-					count = record.get("count").asInt();
-				}
-				tx.commit();
-				tx.close();
-				return count;
-			});
 		}catch(ClientException e) {
 			e.printStackTrace();
 			throw new Neo4jMovieBusinessException("Unable to assign actor.", e);
 		}
-		return res;
+		return result;
 	}
 	
 	/* Assign actor to movie
-	 * params: long movieId, long personId
+	 * params: long movieId, Person List
 	 * return: List<Person>
 	 */
-	public List<Person> assignActorToMovie(long movieId, long personId) throws Neo4jMovieBusinessException{
-		List<Person> persons = new ArrayList<>();
-		if(assignPersonToMovie(movieId, personId, "ACTED_IN") == 1) {
-			persons = personDAO.movieActors(movieId);
-		}
-		return persons;
+	public List<Person> assignActorsToMovie(long movieId, List<Person> persons) throws Neo4jMovieBusinessException{
+		
+		return assignPersonToMovie(movieId, persons, "ACTED_IN");
 	}
 	
 	/* Assign director to movie
 	 * params: long movieId, long personId
 	 * return: List<Person>
 	 */
-	public List<Person> assignDirectorToMovie(long movieId, long personId) throws Neo4jMovieBusinessException{
-		List<Person> persons = new ArrayList<>();
-		if(assignPersonToMovie(movieId, personId, "DIRECTED") == 1) {
-			persons = personDAO.movieDirectors(movieId);
-		}
-		return persons;
+	public List<Person> assignDirectorsToMovie(long movieId, List<Person> persons) throws Neo4jMovieBusinessException{
+		return assignPersonToMovie(movieId, persons, "DIRECTED");
 	}
 	
 	/* Assign producer to movie
 	 * params: long movieId, long personId
 	 * return: List<Person>
 	 */
-	public List<Person> assignProducerToMovie(long movieId, long personId) throws Neo4jMovieBusinessException{
-		List<Person> persons = new ArrayList<>();
-		if(assignPersonToMovie(movieId, personId, "PRODUCED") == 1) {
-			persons = personDAO.movieProducers(movieId);
-		}
-		return persons;
+	public List<Person> assignProducersToMovie(long movieId, List<Person> persons) throws Neo4jMovieBusinessException{
+		return assignPersonToMovie(movieId, persons, "PRODUCED");
 	}
 	
 	/* Assign director to movie
 	 * params: long movieId, long personId
 	 * return: List<Person>
 	 */
-	public List<Person> assignWriterToMovie(long movieId, long personId) throws Neo4jMovieBusinessException{
-		List<Person> persons = new ArrayList<>();
-		if(assignPersonToMovie(movieId, personId, "WROTE") == 1) {
-			persons = personDAO.movieWriters(movieId);
-		}
-		return persons;
+	public List<Person> assignWritersToMovie(long movieId, List<Person> persons) throws Neo4jMovieBusinessException{
+		return assignPersonToMovie(movieId, persons, "WROTE");
 	}
 }

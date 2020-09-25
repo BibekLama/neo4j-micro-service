@@ -91,26 +91,26 @@ public class MovieController {
 	}
 	
 	@CrossOrigin(origins = "*")
-	@GetMapping(value="/movies/{movieId}/actors/{personId}")
-	public List<Person> assignActorToMovie(@PathVariable long personId, @PathVariable long movieId) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
-		return dao.assignActorToMovie(movieId, personId);
+	@PostMapping(value="/movies/{movieId}/directors")
+	public List<Person> assignDirectors( @PathVariable long movieId, @RequestBody List<Person> persons) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
+		return dao.assignDirectorsToMovie(movieId, persons);
 	}
 	
 	@CrossOrigin(origins = "*")
-	@GetMapping(value="/movies/{movieId}/directors/{personId}")
-	public List<Person> assignDirectorToMovie(@PathVariable long personId, @PathVariable long movieId) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
-		return dao.assignDirectorToMovie(movieId, personId);
+	@PostMapping(value="/movies/{movieId}/producers")
+	public List<Person> assignProducers(@PathVariable long movieId, @RequestBody List<Person> persons) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
+		return dao.assignProducersToMovie(movieId, persons);
 	}
 	
 	@CrossOrigin(origins = "*")
-	@GetMapping(value="/movies/{movieId}/producers/{personId}")
-	public List<Person> assignProducerToMovie(@PathVariable long personId, @PathVariable long movieId) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
-		return dao.assignProducerToMovie(movieId, personId);
+	@PostMapping(value="/movies/{movieId}/writers")
+	public List<Person> assignWriters(@PathVariable long movieId, @RequestBody List<Person> persons) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
+		return dao.assignWritersToMovie(movieId, persons);
 	}
 	
 	@CrossOrigin(origins = "*")
-	@GetMapping(value="/movies/{movieId}/writers/{personId}")
-	public List<Person> assignWriterToMovie(@PathVariable long personId, @PathVariable long movieId) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
-		return dao.assignWriterToMovie(movieId, personId);
+	@PostMapping(value="/movies/{movieId}/actors")
+	public List<Person> assignActors(@PathVariable long movieId, @RequestBody List<Person> persons) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
+		return dao.assignActorsToMovie(movieId, persons);
 	}
 }
