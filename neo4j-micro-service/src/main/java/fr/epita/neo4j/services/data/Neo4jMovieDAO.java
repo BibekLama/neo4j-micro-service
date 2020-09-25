@@ -400,4 +400,74 @@ public class Neo4jMovieDAO {
 	public List<Person> assignWritersToMovie(long movieId, List<Person> persons) throws Neo4jMovieBusinessException{
 		return assignPersonToMovie(movieId, persons, "WROTE");
 	}
+	
+	/* Assign person to movie
+	 * params: long mId, long pId, String relation
+	 * return: int
+	 */
+	public List<Person> removePersonFromMovie(long mId, List<Person> persons, String relation) throws Neo4jMovieBusinessException{
+		DBConnection db = new DBConnection();
+		List<Person> result = new ArrayList<>();
+		try(Session session = db.getDriver().session()) {
+			for(Person person : persons) {
+				System.out.println(person.getId());
+				Person res = session.writeTransaction(tx -> {
+					String query = "MATCH (m:Movie), (p:Person), (m)<-[r:"+relation+"]-(p) WHERE ID(m)="+mId+" AND ID(p)="+person.getId()+" DELETE r RETURN p, ID(p) as ID";
+					Result rs = tx.run(query);
+					Person p = new Person();
+					if(rs.hasNext()) {
+						Record record = rs.next();
+						Value value = record.get("p");
+						Map<String, Object> properties = value.asEntity().asMap();
+						p.setId(record.get("ID").asLong());
+						p.setName(String.valueOf(properties.get("name")));
+						if(properties.get("born") != null) {
+			            	p.setBorn(Long.valueOf(String.valueOf(properties.get("born"))));
+			            }
+					}
+					tx.commit();
+					tx.close();
+					return p;
+				});
+			    result.add(res);
+			}
+		}catch(ClientException e) {
+			e.printStackTrace();
+			throw new Neo4jMovieBusinessException("Unable to unassign actor.", e);
+		}
+		return result;
+	}
+	
+	/* Unassign actors from movie
+	 * params: long movieId, Person List
+	 * return: List<Person>
+	 */
+	public List<Person> removeActorsFromMovie(long movieId, List<Person> persons) throws Neo4jMovieBusinessException{
+		
+		return removePersonFromMovie(movieId, persons, "ACTED_IN");
+	}
+	
+	/* Unassign director from movie
+	 * params: long movieId, long personId
+	 * return: List<Person>
+	 */
+	public List<Person> removeDirectorsFromMovie(long movieId, List<Person> persons) throws Neo4jMovieBusinessException{
+		return removePersonFromMovie(movieId, persons, "DIRECTED");
+	}
+	
+	/* Unassign producer from movie
+	 * params: long movieId, long personId
+	 * return: List<Person>
+	 */
+	public List<Person> removeProducersFromMovie(long movieId, List<Person> persons) throws Neo4jMovieBusinessException{
+		return removePersonFromMovie(movieId, persons, "PRODUCED");
+	}
+	
+	/* Unassign director from movie
+	 * params: long movieId, long personId
+	 * return: List<Person>
+	 */
+	public List<Person> removeWritersFromMovie(long movieId, List<Person> persons) throws Neo4jMovieBusinessException{
+		return removePersonFromMovie(movieId, persons, "WROTE");
+	}
 }

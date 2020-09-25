@@ -113,4 +113,28 @@ public class MovieController {
 	public List<Person> assignActors(@PathVariable long movieId, @RequestBody List<Person> persons) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
 		return dao.assignActorsToMovie(movieId, persons);
 	}
+	
+	@CrossOrigin(origins = "*")
+	@DeleteMapping(value="/movies/{movieId}/directors")
+	public List<Person> removeDirectors( @PathVariable long movieId, @RequestBody List<Person> persons) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
+		return dao.removeDirectorsFromMovie(movieId, persons);
+	}
+	
+	@CrossOrigin(origins = "*")
+	@DeleteMapping(value="/movies/{movieId}/producers")
+	public List<Person> removeProducers(@PathVariable long movieId, @RequestBody List<Person> persons) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
+		return dao.removeProducersFromMovie(movieId, persons);
+	}
+	
+	@CrossOrigin(origins = "*")
+	@DeleteMapping(value="/movies/{movieId}/writers")
+	public List<Person> removeWriters(@PathVariable long movieId, @RequestBody List<Person> persons) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
+		return dao.removeWritersFromMovie(movieId, persons);
+	}
+	
+	@CrossOrigin(origins = "*")
+	@DeleteMapping(value="/movies/{movieId}/actors")
+	public List<Person> removeActors(@PathVariable long movieId, @RequestBody List<Person> persons) throws Neo4jPersonBusinessException, Neo4jMovieBusinessException{
+		return dao.removeActorsFromMovie(movieId, persons);
+	}
 }
