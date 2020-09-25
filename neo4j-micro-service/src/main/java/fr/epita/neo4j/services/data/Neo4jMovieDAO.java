@@ -349,7 +349,7 @@ public class Neo4jMovieDAO {
 				}
 			}
 			res = session.writeTransaction(tx -> {
-				String query = "MATCH (m:Movie),(p:Person) WHERE ID(m)="+mId+" AND ID(p)="+pId+" CREATE (m)<-[r:"+relation+"]-(p) RETURN COUNT(r) AS count";
+				String query = "MATCH (m:Movie),(p:Person) WHERE ID(m)="+mId+" AND ID(p)="+pId+" MERGE (m)<-[r:"+relation+"]-(p) RETURN COUNT(r) AS count";
 				Result rs = tx.run(query);
 				int count = 0;
 				if(rs.hasNext()) {
