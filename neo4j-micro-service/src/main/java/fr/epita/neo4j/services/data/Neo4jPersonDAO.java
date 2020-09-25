@@ -194,6 +194,7 @@ public class Neo4jPersonDAO {
 				String query = "CREATE (n:Person {name: $name, born: $born}) RETURN n, ID(n) as ID";
 				Result rs = tx.run(query, params);
 				Record record = rs.single();
+				tx.commit();
 				try {
 					return getPersonById(record.get("ID").asLong());
 				} catch (Neo4jPersonBusinessException | Neo4jMovieBusinessException e) {
