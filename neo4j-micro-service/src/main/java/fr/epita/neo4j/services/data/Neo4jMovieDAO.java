@@ -339,27 +339,29 @@ public class Neo4jMovieDAO {
 		DBConnection db = new DBConnection();
 		List<Person> result = new ArrayList<>();
 		try(Session session = db.getDriver().session()) {
-			for(Person person : persons) {
-				System.out.println(person.getId());
-				Person res = session.writeTransaction(tx -> {
-					String query = "MATCH (m:Movie), (p:Person) WHERE ID(m)="+mId+" AND ID(p)="+person.getId()+" MERGE (m)<-[r:"+relation+"]-(p) RETURN p, ID(p) as ID";
-					Result rs = tx.run(query);
-					Person p = new Person();
-					if(rs.hasNext()) {
-						Record record = rs.next();
-						Value value = record.get("p");
-						Map<String, Object> properties = value.asEntity().asMap();
-						p.setId(record.get("ID").asLong());
-						p.setName(String.valueOf(properties.get("name")));
-						if(properties.get("born") != null) {
-			            	p.setBorn(Long.valueOf(String.valueOf(properties.get("born"))));
-			            }
-					}
-					tx.commit();
-					tx.close();
-					return p;
-				});
-			    result.add(res);
+			if(persons.size() > 0) {
+				for(Person person : persons) {
+					System.out.println(person.getId());
+					Person res = session.writeTransaction(tx -> {
+						String query = "MATCH (m:Movie), (p:Person) WHERE ID(m)="+mId+" AND ID(p)="+person.getId()+" MERGE (m)<-[r:"+relation+"]-(p) RETURN p, ID(p) as ID";
+						Result rs = tx.run(query);
+						Person p = new Person();
+						if(rs.hasNext()) {
+							Record record = rs.next();
+							Value value = record.get("p");
+							Map<String, Object> properties = value.asEntity().asMap();
+							p.setId(record.get("ID").asLong());
+							p.setName(String.valueOf(properties.get("name")));
+							if(properties.get("born") != null) {
+				            	p.setBorn(Long.valueOf(String.valueOf(properties.get("born"))));
+				            }
+						}
+						tx.commit();
+						tx.close();
+						return p;
+					});
+				    result.add(res);
+				}
 			}
 		}catch(ClientException e) {
 			e.printStackTrace();
