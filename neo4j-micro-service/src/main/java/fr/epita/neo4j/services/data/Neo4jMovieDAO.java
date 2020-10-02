@@ -260,8 +260,7 @@ public class Neo4jMovieDAO {
 				movieParams.put( "released", movie.getReleased() );
 				
 				// Update movie by node id
-				String updateMovieQuery = "MATCH (n:Movie) WHERE id(n)="+id+" SET n.title='"+movie.getTitle()+"', n.tagline='"+movie.getTagline()+"', "
-						+ "n.released="+movie.getReleased()+" RETURN n, ID(n) as ID";
+				String updateMovieQuery = "MATCH (n:Movie) WHERE id(n)="+id+" SET n.title=$title, n.tagline=$tagline, n.released=$released RETURN n, ID(n) as ID";
 				Result createMovieResult = tx.run(updateMovieQuery, movieParams);
 				Record record = createMovieResult.single();
 				Movie updatedMovie = getMovieDetail(record, tx);
