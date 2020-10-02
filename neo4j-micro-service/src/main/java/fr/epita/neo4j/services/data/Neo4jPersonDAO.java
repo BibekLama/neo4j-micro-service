@@ -228,7 +228,7 @@ public class Neo4jPersonDAO {
 				Map<String, Object> params = new HashMap<String, Object>();
 				params.put( "name", person.getName() );
 				params.put( "born", person.getBorn() );
-				String query = "MATCH (p:Person) WHERE id(p)="+id+" SET p.name='"+person.getName()+"', p.born="+person.getBorn()+" RETURN p, ID(p) as ID"+"";
+				String query = "MATCH (p:Person) WHERE id(p)="+id+" SET p.name=$name, p.born=$born RETURN p, ID(p) as ID"+"";
 				Result rs = tx.run(query, params);
 				Record record = rs.single();
 				tx.commit();
